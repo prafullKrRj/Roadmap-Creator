@@ -84,4 +84,5 @@ dependencies {
     implementation(libs.symbol.processing.api)
     implementation(libs.generativeai)
     implementation(libs.kotlinx.serialization.json)
+
 }
