@@ -85,4 +85,7 @@ dependencies {
     implementation(libs.generativeai)
     implementation(libs.kotlinx.serialization.json)
 
+    implementation("androidx.compose.ui:ui-viewbinding:1.5.4")
+    implementation("androidx.webkit:webkit:1.6.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
 }
