@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.devtools.ksp")
+    kotlin("kapt")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -79,13 +79,15 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.core.ktx)
-    ksp(libs.androidx.room.compiler)
+    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.symbol.processing.api)
+
     implementation(libs.generativeai)
     implementation(libs.kotlinx.serialization.json)
-
     implementation("androidx.compose.ui:ui-viewbinding:1.5.4")
     implementation("androidx.webkit:webkit:1.6.1")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
+}
+kapt {
+    correctErrorTypes = true
 }
