@@ -5,13 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.prafull.roadmapcreator.utils.Const
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.asStateFlow
 
 
 data class RoadmapPrompt(
@@ -24,6 +22,7 @@ data class RoadmapPrompt(
 ) {
     fun toPrompt(): String {
         return """
+            skill: $skill
             level: $level
             timeframe: $timeframe
             focus_area: $focusArea
@@ -34,13 +33,15 @@ data class RoadmapPrompt(
 }
 
 data class UiState(
-    val prompt: String
+    val prompt: String,
+    val response: String,
+    val loading: Boolean,
+    val error: Pair<Boolean, String?>
 )
 
 class AppViewModel : ViewModel() {
-    val state = MutableStateFlow("")
-
-
+    private val _state = MutableStateFlow(UiState("", "", false, Pair(false, null)))
+    val state = _state.asStateFlow()
     var roadmapPrompt by mutableStateOf(
         RoadmapPrompt(
             skill = ""
@@ -55,22 +56,29 @@ class AppViewModel : ViewModel() {
     )
     private val chat = generation.startChat()
 
-    fun sendPrompt(prompt: String) {
+    fun sendPrompt() {
         try {
-            viewModelScope.launch {
-                val response = chat.sendMessage(prompt)
-                response.text?.let { text ->
-                    state.update {
-                        text.substringAfterLast("```mermaid").substringBeforeLast("```")
-                    }
-                    Log.d(
-                        "AppViewModel",
-                        "sendPrompt: ${
-                            text.substringAfterLast("```mermaid").substringBeforeLast("```")
-                        }"
-                    )
-                }
-            }
+            Log.d("AppViewModel", "sendPrompt: ${roadmapPrompt.toPrompt()}")
+            _state.value = UiState(
+                prompt = roadmapPrompt.toPrompt(),
+                response = "",
+                loading = true,
+                error = Pair(false, null)
+            )
+            /* viewModelScope.launch {
+                 val response = chat.sendMessage(prompt)
+                 response.text?.let { text ->
+                     state.update {
+                         text.substringAfterLast("```mermaid").substringBeforeLast("```")
+                     }
+                     Log.d(
+                         "AppViewModel",
+                         "sendPrompt: ${
+                             text.substringAfterLast("```mermaid").substringBeforeLast("```")
+                         }"
+                     )
+                 }
+             }*/
         } catch (e: Exception) {
             e.printStackTrace()
         }

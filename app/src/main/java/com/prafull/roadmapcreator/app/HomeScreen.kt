@@ -25,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -33,6 +34,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -74,8 +76,23 @@ fun HomeScreen(viewModel: AppViewModel) {
             contentPadding = PaddingValues(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            item("field") {
-                InputField(viewModel)
+            if (state.response.isEmpty()) {
+                item("field") {
+                    InputField(viewModel)
+                }
+            } else {
+                item("Graph Item") {
+                    Text(
+                        text = state.response,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+            if (state.loading) {
+                item {
+                    CircularProgressIndicator()
+                }
             }
             item {
 
@@ -87,7 +104,6 @@ fun HomeScreen(viewModel: AppViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun InputField(viewModel: AppViewModel) {
-    var skill by remember { mutableStateOf("") }
     var expandedMenu by remember { mutableStateOf<String?>(null) }
     var expandCard by rememberSaveable {
         mutableStateOf(false)
@@ -115,8 +131,12 @@ private fun InputField(viewModel: AppViewModel) {
                 )
                 // Skill Input
                 OutlinedTextField(
-                    value = skill,
-                    onValueChange = { skill = it },
+                    value = viewModel.roadmapPrompt.skill,
+                    onValueChange = {
+                        viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
+                            skill = it
+                        )
+                    },
                     label = { Text("Skill to Learn") },
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = {
@@ -157,12 +177,12 @@ private fun InputField(viewModel: AppViewModel) {
                             }
                         ) {
                             OutlinedTextField(
-                                value = viewModel.roadmapPrompt.level?.name ?: "Select Level",
+                                value = viewModel.roadmapPrompt.level.name,
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu == "level") },
                                 modifier = Modifier
-                                    .menuAnchor()
+                                    .menuAnchor(MenuAnchorType.PrimaryEditable)
                                     .fillMaxWidth(),
                                 leadingIcon = {
                                     Icon(
@@ -177,7 +197,7 @@ private fun InputField(viewModel: AppViewModel) {
                             ) {
                                 Level.entries.forEach { level ->
                                     DropdownMenuItem(
-                                        text = { Text(level.name.toLowerCase().capitalize()) },
+                                        text = { Text(getCase(level.name)) },
                                         onClick = {
                                             viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
                                                 level = level
@@ -198,14 +218,15 @@ private fun InputField(viewModel: AppViewModel) {
                             }
                         ) {
                             OutlinedTextField(
-                                value = viewModel.roadmapPrompt.timeframe?.name?.replace("_", " ")
-                                    ?.toLowerCase()
-                                    ?.capitalize() ?: "Select Timeframe",
+                                value = viewModel.roadmapPrompt.timeframe.name.replace(
+                                    "_",
+                                    " "
+                                ).toCase(),
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu == "timeframe") },
                                 modifier = Modifier
-                                    .menuAnchor()
+                                    .menuAnchor(MenuAnchorType.PrimaryEditable)
                                     .fillMaxWidth(),
                                 leadingIcon = {
                                     Icon(
@@ -222,8 +243,7 @@ private fun InputField(viewModel: AppViewModel) {
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                timeframe.name.replace("_", " ").toLowerCase()
-                                                    .capitalize()
+                                                timeframe.name.replace("_", " ").toCase()
                                             )
                                         },
                                         onClick = {
@@ -269,7 +289,7 @@ private fun InputField(viewModel: AppViewModel) {
                                         }
                                     )
                                     Text(
-                                        text = focus.name.toLowerCase().capitalize(),
+                                        text = focus.name.toCase(),
                                         modifier = Modifier.padding(start = 8.dp)
                                     )
                                 }
@@ -285,18 +305,15 @@ private fun InputField(viewModel: AppViewModel) {
                             }
                         ) {
                             OutlinedTextField(
-                                value = viewModel.roadmapPrompt.prerequisiteKnowledge?.name?.replace(
+                                value = viewModel.roadmapPrompt.prerequisiteKnowledge.name.replace(
                                     "_",
                                     " "
-                                )
-                                    ?.lowercase(Locale.getDefault())
-                                    ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                                    ?: "Select Prerequisites",
+                                ).toCase(),
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu == "prerequisite") },
                                 modifier = Modifier
-                                    .menuAnchor()
+                                    .menuAnchor(MenuAnchorType.PrimaryEditable)
                                     .fillMaxWidth(),
                                 leadingIcon = {
                                     Icon(
@@ -313,8 +330,7 @@ private fun InputField(viewModel: AppViewModel) {
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                prerequisite.name.toLowerCase(Locale.ROOT)
-                                                    .capitalize(java.util.Locale.ROOT)
+                                                prerequisite.name.toCase()
                                             )
                                         },
                                         onClick = {
@@ -339,7 +355,7 @@ private fun InputField(viewModel: AppViewModel) {
                                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                LearningStyle.values().forEach { style ->
+                                LearningStyle.entries.forEach { style ->
                                     FilterChip(
                                         selected = viewModel.roadmapPrompt.learningStyle == style,
                                         onClick = {
@@ -349,8 +365,7 @@ private fun InputField(viewModel: AppViewModel) {
                                         },
                                         label = {
                                             Text(
-                                                style.name.replace("_", " ").toLowerCase()
-                                                    .capitalize()
+                                                style.name.replace("_", " ").toCase()
                                             )
                                         },
                                         leadingIcon = {
@@ -366,20 +381,29 @@ private fun InputField(viewModel: AppViewModel) {
                                 }
                             }
                         }
-
-
-                        Button(
-                            onClick = {
-                                // todo
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text("Generate Roadmap")
-                        }
                     }
+                }
+                Button(
+                    onClick = {
+                        viewModel.sendPrompt()
+                    },
+                    enabled = viewModel.roadmapPrompt.skill.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Generate Roadmap")
                 }
             }
         }
     }
+}
+
+fun String.toCase(): String {
+    return this.lowercase(Locale.ROOT)
+        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+}
+
+fun getCase(str: String): String {
+    return str.lowercase(Locale.ROOT)
+        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 }
