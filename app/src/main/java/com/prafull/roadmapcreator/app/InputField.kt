@@ -53,7 +53,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoadmapInput(viewModel: AppViewModel) {
+fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
     var expandedMenu by remember { mutableStateOf<String?>(null) }
     var expandCard by rememberSaveable {
         mutableStateOf(false)
@@ -345,7 +345,7 @@ fun RoadmapInput(viewModel: AppViewModel) {
                     onClick = {
                         viewModel.sendPrompt()
                     },
-                    enabled = viewModel.roadmapPrompt.skill.isNotEmpty(),
+                    enabled = viewModel.roadmapPrompt.skill.isNotEmpty() && !state.loading,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {

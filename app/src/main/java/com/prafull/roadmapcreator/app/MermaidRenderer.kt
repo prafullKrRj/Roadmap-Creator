@@ -1,6 +1,5 @@
 package com.prafull.roadmapcreator.app
 
-import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Column
@@ -12,8 +11,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+
+
+@Composable
+fun Mermaid(string: String, lightTheme: Boolean, onWebViewCreated: (WebView) -> Unit) {
+    val mermaidState = rememberMermaidState(
+        initialDiagram = string.trimIndent(), initialTheme = "default"
+    )
+
+    Column(Modifier.fillMaxSize()) {
+        MermaidDiagram(
+            diagram = mermaidState.diagram,
+            theme = mermaidState.theme,
+            modifier = Modifier.fillMaxSize(),
+            onLoadComplete = {
+                // Handle diagram load complete
+            },
+            onWebViewCreated = onWebViewCreated,
+            backgroundColor = if (lightTheme) Color.White else Color.Black
+        )
+    }
+}
 
 
 private class MermaidRenderer {
@@ -42,7 +64,8 @@ private class MermaidRenderer {
                         background-color: transparent;
                     }
                     .mermaid { 
-                        width: 100%;
+                        height: 100%;
+                        overflow-x: auto;
                         display: flex;
                         justify-content: center;
                     }
@@ -63,40 +86,43 @@ private fun MermaidDiagram(
     diagram: String,
     modifier: Modifier = Modifier,
     theme: String = "default",
-    onLoadComplete: () -> Unit = {}
+    onLoadComplete: () -> Unit = {},
+    onWebViewCreated: (WebView) -> Unit = {},
+    backgroundColor: Color
 ) {
     val context = LocalContext.current
     val webView = remember {
         WebView(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
             settings.apply {
                 javaScriptEnabled = true
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 builtInZoomControls = true
                 displayZoomControls = false
+                setSupportZoom(true)
             }
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
+                    view?.evaluateJavascript(
+                        """
+                        document.body.style.zoom = '1.0';
+                        document.querySelector('svg').style.maxWidth = '100%';
+                        document.querySelector('svg').style.maxHeight = '100%';
+                    """.trimIndent(), null
+                    )
                     onLoadComplete()
                 }
             }
-            isHorizontalScrollBarEnabled = true
-            setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        }
+            isHorizontalScrollBarEnabled = false
+            isVerticalScrollBarEnabled = false
+            setBackgroundColor(Color.Transparent.toArgb())
+        }.also { onWebViewCreated(it) }
     }
 
     DisposableEffect(diagram, theme) {
         webView.loadDataWithBaseURL(
-            null,
-            MermaidRenderer.generateHtml(diagram, theme),
-            "text/html",
-            "UTF-8",
-            null
+            null, MermaidRenderer.generateHtml(diagram, theme), "text/html", "UTF-8", null
         )
 
         onDispose {
@@ -106,15 +132,13 @@ private fun MermaidDiagram(
     }
 
     AndroidView(
-        factory = { webView },
-        modifier = modifier
+        factory = { webView }, modifier = modifier.fillMaxSize()
     )
 }
 
 // Optional: State holder for the diagram
 class MermaidState(
-    initialDiagram: String = "",
-    initialTheme: String = "default"
+    initialDiagram: String = "", initialTheme: String = "default"
 ) {
     var diagram by mutableStateOf(initialDiagram)
         private set
@@ -133,27 +157,7 @@ class MermaidState(
 
 @Composable
 fun rememberMermaidState(
-    initialDiagram: String = "",
-    initialTheme: String = "default"
+    initialDiagram: String = "", initialTheme: String = "default"
 ): MermaidState = remember {
     MermaidState(initialDiagram, initialTheme)
-}
-
-// Usage Example
-@Composable
-fun Mermaid(string: String) {
-    val mermaidState = rememberMermaidState(
-        initialDiagram = string.trimIndent(),
-        initialTheme = "default"
-    )
-    Column(Modifier.fillMaxSize()) {
-        MermaidDiagram(
-            diagram = mermaidState.diagram,
-            theme = mermaidState.theme,
-            modifier = Modifier.fillMaxSize(),
-            onLoadComplete = {
-                // Handle diagram load complete
-            }
-        )
-    }
 }

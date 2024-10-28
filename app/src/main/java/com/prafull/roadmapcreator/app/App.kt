@@ -1,6 +1,5 @@
 package com.prafull.roadmapcreator.app
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,11 +13,9 @@ sealed interface Screens {
     @Serializable
     data object Home : Screens
 
-    @Serializable
-    data class History(val historyId: Long) : Screens
 
     @Serializable
-    data class GraphScreen(val graph: String) : Screens
+    data class GraphScreen(val graph: String, val title: String = "") : Screens
 }
 
 @Composable
@@ -28,12 +25,10 @@ fun MainScreen() {
         composable<Screens.Home> {
             HomeScreen(viewModel = getViewModel(), navController)
         }
-        composable<Screens.History> {
-            Text(text = "History")
-        }
         composable<Screens.GraphScreen> {
             GraphScreen(
                 graph = it.toRoute<Screens.GraphScreen>().graph,
+                title = it.toRoute<Screens.GraphScreen>().title,
                 navController = navController
             )
         }

@@ -7,7 +7,6 @@ import com.prafull.roadmapcreator.app.LearningStyle
 import com.prafull.roadmapcreator.app.Level
 import com.prafull.roadmapcreator.app.PrerequisiteKnowledge
 import com.prafull.roadmapcreator.app.Timeframe
-import java.time.LocalDateTime
 
 @Entity
 data class RoadmapEntity(
