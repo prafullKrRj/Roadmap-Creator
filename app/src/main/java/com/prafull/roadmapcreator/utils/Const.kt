@@ -2,7 +2,7 @@ package com.prafull.roadmapcreator.utils
 
 object Const {
 
-    const val API_KEY = "AIzaSyB-zfXsfasbCehVTb9YRGwuqGZD7LAEOy0"
+    const val API_KEY = "AIzaSyB-zfXsfasbCehVTb9YRGwuqGZD7LAEOy0" // don't try to use this as it is not there
 
 
     const val FLOWCHART_SYSTEM_PROMPT =
