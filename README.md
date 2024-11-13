@@ -90,5 +90,3 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 <p align="center">Made with ❤️ by Prafull Kumar</p>
 
 ---
-
-This README template should give your project a professional, organized look while making it easy for users to get started. Feel free to adjust images and any specific links as needed.
