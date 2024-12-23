@@ -1,5 +1,6 @@
 package com.prafull.roadmapcreator.app
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,13 +10,17 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.prafull.roadmapcreator.app.data.RoadmapDao
 import com.prafull.roadmapcreator.app.data.RoadmapEntity
+import com.prafull.roadmapcreator.utils.ApiKey
 import com.prafull.roadmapcreator.utils.Const
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.UUID
 
 
@@ -47,11 +52,17 @@ data class UiState(
     val loading: Boolean,
     val error: Pair<Boolean, String?>
 )
-
+sealed class NetworkState {
+    data object Idle : NetworkState()
+    data object Loading : NetworkState()
+    data object Success : NetworkState()
+    data class Error(val message: String) : NetworkState()
+}
 class AppViewModel(
     private val dao: RoadmapDao
-) : ViewModel() {
+) : ViewModel(), KoinComponent {
 
+    private val apiKey: ApiKey by inject()
     val history: StateFlow<List<RoadmapEntity>> = dao.getallroadmaps().stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -67,16 +78,22 @@ class AppViewModel(
 
     val state = _state.asStateFlow()
 
+    private val _networkState = MutableStateFlow<NetworkState>(NetworkState.Idle)
+    val networkState: StateFlow<NetworkState> = _networkState.asStateFlow()
+
 
     private val generation = GenerativeModel(
-        modelName = "gemini-1.5-flash-8b-001",
-        apiKey = Const.API_KEY,
+        modelName = "gemini-2.0-flash-exp",
+        apiKey = apiKey.apiKey,
         systemInstruction = content {
             text(Const.FLOWCHART_SYSTEM_PROMPT)
         })
     private val chat = generation.startChat()
 
     fun sendPrompt() {
+        _networkState.update {
+            NetworkState.Loading
+        }
         viewModelScope.launch {
             try {
                 _state.value = UiState(
@@ -112,6 +129,10 @@ class AppViewModel(
                         it
                     )
                 }
+                Log.d("testing", response.text ?: "")
+                _networkState.update {
+                    NetworkState.Success
+                }
             } catch (e: Exception) {
                 _state.value = UiState(
                     prompt = roadmapPrompt.toPrompt(),
@@ -120,11 +141,18 @@ class AppViewModel(
                     loading = false,
                     error = Pair(true, e.message)
                 )
+                Log.d("testing", e.message.toString() ?: "")
                 e.printStackTrace()
+                _networkState.update {
+                    NetworkState.Error(e.message ?: "An error occurred")
+                }
             }
         }
     }
 
+    fun resetState() {
+        _networkState.value = NetworkState.Idle
+    }
     fun String.formatRoadmap(): String {
         this.substringAfter("```mermaid").let {
             return it.substringBeforeLast("```")
@@ -156,4 +184,5 @@ class AppViewModel(
             error = Pair(false, null)
         )
     }
+
 }

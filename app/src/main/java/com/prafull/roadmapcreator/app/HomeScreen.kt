@@ -53,6 +53,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,6 +81,7 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
     val state by viewModel.state.collectAsState()
     val history by viewModel.history.collectAsState()
     val scope = rememberCoroutineScope()
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     ModalNavigationDrawer(drawerContent = {
         ModalDrawerSheet {
@@ -142,7 +144,7 @@ fun HomeScreen(viewModel: AppViewModel, navController: NavController) {
                 ) {
                     if (state.response.isEmpty()) {
                         item("field") {
-                            RoadmapInput(viewModel, state)
+                            RoadmapInput(viewModel, state, navController)
                         }
                     } else {
                         item("Graph Item") {

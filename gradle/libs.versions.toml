@@ -17,6 +17,10 @@ composeBom = "2024.10.00"
 navigationCompose = "2.8.3"
 roomRuntime = "2.6.1"
 symbolProcessingApi = "2.0.20-1.0.24"
+googleGmsGoogleServices = "4.4.2"
+firebaseFirestore = "25.1.1"
+firebaseCrashlytics = "19.3.0"
+googleFirebaseCrashlytics = "3.0.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,8 +49,12 @@ koin-androidx-navigation = { module = "io.insert-koin:koin-androidx-navigation",
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinCore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "symbolProcessingApi" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 

@@ -35,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,17 +48,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.prafull.roadmapcreator.R
 import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
+fun RoadmapInput(viewModel: AppViewModel, state: UiState, navController: NavController) {
     var expandedMenu by remember { mutableStateOf<String?>(null) }
     var expandCard by rememberSaveable {
         mutableStateOf(false)
     }
+    val promptLoaded by viewModel.networkState.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -80,8 +83,7 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                     fontWeight = FontWeight.Bold
                 )
                 // Skill Input
-                OutlinedTextField(
-                    value = viewModel.roadmapPrompt.skill,
+                OutlinedTextField(value = viewModel.roadmapPrompt.skill,
                     onValueChange = {
                         viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
                             skill = it
@@ -94,8 +96,7 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                             ImageVector.vectorResource(id = R.drawable.baseline_school_24),
                             contentDescription = null
                         )
-                    }
-                )
+                    })
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     IconButton(onClick = {
                         expandCard = !expandCard
@@ -110,24 +111,19 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                     }
                 }
                 AnimatedVisibility(
-                    visible = expandCard,
-                    enter = fadeIn() + expandVertically(
+                    visible = expandCard, enter = fadeIn() + expandVertically(
                         animationSpec = tween(
                             durationMillis = 300
                         )
-                    ),
-                    exit = fadeOut()
+                    ), exit = fadeOut()
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         // Level Selection
-                        ExposedDropdownMenuBox(
-                            expanded = expandedMenu == "level",
+                        ExposedDropdownMenuBox(expanded = expandedMenu == "level",
                             onExpandedChange = {
                                 expandedMenu = if (expandedMenu == "level") null else "level"
-                            }
-                        ) {
-                            OutlinedTextField(
-                                value = viewModel.roadmapPrompt.level.name,
+                            }) {
+                            OutlinedTextField(value = viewModel.roadmapPrompt.level.name,
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu == "level") },
@@ -139,39 +135,30 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                                         ImageVector.vectorResource(id = R.drawable.baseline_grade_24),
                                         contentDescription = null
                                     )
-                                }
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedMenu == "level",
-                                onDismissRequest = { expandedMenu = null }
-                            ) {
+                                })
+                            ExposedDropdownMenu(expanded = expandedMenu == "level",
+                                onDismissRequest = { expandedMenu = null }) {
                                 Level.entries.forEach { level ->
-                                    DropdownMenuItem(
-                                        text = { Text(getCase(level.name)) },
+                                    DropdownMenuItem(text = { Text(getCase(level.name)) },
                                         onClick = {
                                             viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
                                                 level = level
                                             )
                                             expandedMenu = null
-                                        }
-                                    )
+                                        })
                                 }
                             }
                         }
 
                         // Timeframe Selection
-                        ExposedDropdownMenuBox(
-                            expanded = expandedMenu == "timeframe",
+                        ExposedDropdownMenuBox(expanded = expandedMenu == "timeframe",
                             onExpandedChange = {
                                 expandedMenu =
                                     if (expandedMenu == "timeframe") null else "timeframe"
-                            }
-                        ) {
-                            OutlinedTextField(
-                                value = viewModel.roadmapPrompt.timeframe.name.replace(
-                                    "_",
-                                    " "
-                                ).toCase(),
+                            }) {
+                            OutlinedTextField(value = viewModel.roadmapPrompt.timeframe.name.replace(
+                                "_", " "
+                            ).toCase(),
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMenu == "timeframe") },
@@ -183,26 +170,20 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                                         ImageVector.vectorResource(id = R.drawable.baseline_timer_24),
                                         contentDescription = null
                                     )
-                                }
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedMenu == "timeframe",
-                                onDismissRequest = { expandedMenu = null }
-                            ) {
+                                })
+                            ExposedDropdownMenu(expanded = expandedMenu == "timeframe",
+                                onDismissRequest = { expandedMenu = null }) {
                                 Timeframe.entries.forEach { timeframe ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                timeframe.name.replace("_", " ").toCase()
-                                            )
-                                        },
-                                        onClick = {
-                                            viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
-                                                timeframe = timeframe
-                                            )
-                                            expandedMenu = null
-                                        }
-                                    )
+                                    DropdownMenuItem(text = {
+                                        Text(
+                                            timeframe.name.replace("_", " ").toCase()
+                                        )
+                                    }, onClick = {
+                                        viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
+                                            timeframe = timeframe
+                                        )
+                                        expandedMenu = null
+                                    })
                                 }
                             }
                         }
@@ -218,26 +199,22 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .selectable(
-                                            selected = viewModel.roadmapPrompt.focusArea == focus,
+                                        .selectable(selected = viewModel.roadmapPrompt.focusArea == focus,
                                             onClick = {
                                                 viewModel.roadmapPrompt =
                                                     viewModel.roadmapPrompt.copy(
                                                         focusArea = focus
                                                     )
-                                            }
-                                        )
+                                            })
                                         .padding(vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    RadioButton(
-                                        selected = viewModel.roadmapPrompt.focusArea == focus,
+                                    RadioButton(selected = viewModel.roadmapPrompt.focusArea == focus,
                                         onClick = {
                                             viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
                                                 focusArea = focus
                                             )
-                                        }
-                                    )
+                                        })
                                     Text(
                                         text = focus.name.toCase(),
                                         modifier = Modifier.padding(start = 8.dp)
@@ -251,18 +228,14 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                             text = "Prerequisite Knowledge",
                             style = MaterialTheme.typography.bodyLarge
                         )
-                        ExposedDropdownMenuBox(
-                            expanded = expandedMenu == "prerequisite",
+                        ExposedDropdownMenuBox(expanded = expandedMenu == "prerequisite",
                             onExpandedChange = {
                                 expandedMenu =
                                     if (expandedMenu == "prerequisite") null else "prerequisite"
-                            }
-                        ) {
-                            OutlinedTextField(
-                                value = viewModel.roadmapPrompt.prerequisiteKnowledge.name.replace(
-                                    "_",
-                                    " "
-                                ).toCase(),
+                            }) {
+                            OutlinedTextField(value = viewModel.roadmapPrompt.prerequisiteKnowledge.name.replace(
+                                "_", " "
+                            ).toCase(),
                                 onValueChange = {
                                     viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
                                         prerequisiteKnowledge = PrerequisiteKnowledge.valueOf(it.uppercase())
@@ -275,29 +248,22 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                                     .fillMaxWidth(),
                                 leadingIcon = {
                                     Icon(
-                                        Icons.Default.Info,
-                                        contentDescription = null
+                                        Icons.Default.Info, contentDescription = null
                                     )
-                                }
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedMenu == "prerequisite",
-                                onDismissRequest = { expandedMenu = null }
-                            ) {
+                                })
+                            ExposedDropdownMenu(expanded = expandedMenu == "prerequisite",
+                                onDismissRequest = { expandedMenu = null }) {
                                 PrerequisiteKnowledge.entries.forEach { prerequisite ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                prerequisite.name.toCase()
-                                            )
-                                        },
-                                        onClick = {
-                                            viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
-                                                prerequisiteKnowledge = prerequisite
-                                            )
-                                            expandedMenu = null
-                                        }
-                                    )
+                                    DropdownMenuItem(text = {
+                                        Text(
+                                            prerequisite.name.toCase()
+                                        )
+                                    }, onClick = {
+                                        viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
+                                            prerequisiteKnowledge = prerequisite
+                                        )
+                                        expandedMenu = null
+                                    })
                                 }
                             }
                         }
@@ -314,8 +280,7 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 LearningStyle.entries.forEach { style ->
-                                    FilterChip(
-                                        selected = viewModel.roadmapPrompt.learningStyle == style,
+                                    FilterChip(selected = viewModel.roadmapPrompt.learningStyle == style,
                                         onClick = {
                                             viewModel.roadmapPrompt = viewModel.roadmapPrompt.copy(
                                                 learningStyle = style
@@ -334,8 +299,7 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                             }
-                                        }
-                                    )
+                                        })
                                 }
                             }
                         }
@@ -344,6 +308,10 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState) {
                 Button(
                     onClick = {
                         viewModel.sendPrompt()
+                        if (promptLoaded is NetworkState.Success) {
+                            navController.navigate(Screens.GraphScreen(state.response, state.prompt.toCase()))
+//                            viewModel.resetState()
+                        }
                     },
                     enabled = viewModel.roadmapPrompt.skill.isNotEmpty() && !state.loading,
                     modifier = Modifier.fillMaxWidth(),
