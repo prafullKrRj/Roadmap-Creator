@@ -141,7 +141,7 @@ class AppViewModel(
                     loading = false,
                     error = Pair(true, e.message)
                 )
-                Log.d("testing", e.message.toString() ?: "")
+                Log.d("testing", e.message.toString())
                 e.printStackTrace()
                 _networkState.update {
                     NetworkState.Error(e.message ?: "An error occurred")

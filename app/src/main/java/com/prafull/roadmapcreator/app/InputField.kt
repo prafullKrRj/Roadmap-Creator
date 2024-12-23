@@ -310,7 +310,7 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState, navController: NavCont
                         viewModel.sendPrompt()
                         if (promptLoaded is NetworkState.Success) {
                             navController.navigate(Screens.GraphScreen(state.response, state.prompt.toCase()))
-//                            viewModel.resetState()
+                            viewModel.resetState()
                         }
                     },
                     enabled = viewModel.roadmapPrompt.skill.isNotEmpty() && !state.loading,
