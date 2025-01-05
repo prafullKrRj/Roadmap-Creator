@@ -5,6 +5,9 @@ import androidx.room.Room
 import com.google.firebase.firestore.FirebaseFirestore
 import com.prafull.roadmapcreator.app.AppViewModel
 import com.prafull.roadmapcreator.app.data.RoadmapCreatorDB
+import com.prafull.roadmapcreator.app.history.HistoryRepository
+import com.prafull.roadmapcreator.app.history.HistoryRepositoryImpl
+import com.prafull.roadmapcreator.app.history.HistoryViewModel
 import com.prafull.roadmapcreator.utils.ApiKey
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -35,7 +38,8 @@ val module = module {
     single<ApiKey> {
         runBlocking {
             ApiKey(
-                FirebaseFirestore.getInstance().collection("apiKey").document("apiKey").get().await()
+                FirebaseFirestore.getInstance().collection("apiKey").document("apiKey").get()
+                    .await()
                     .getString("apiKey")
                     .toString()
             )
@@ -45,6 +49,12 @@ val module = module {
         get<RoadmapCreatorDB>().roadmapDao()
     }
     viewModel {
-        AppViewModel(get())
+        AppViewModel(get(), get())
+    }
+    single<HistoryRepository> {
+        HistoryRepositoryImpl(get())
+    }
+    viewModel {
+        HistoryViewModel(get())
     }
 }

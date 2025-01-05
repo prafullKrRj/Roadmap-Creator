@@ -2,11 +2,11 @@ package com.prafull.roadmapcreator.app.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.prafull.roadmapcreator.app.FocusArea
-import com.prafull.roadmapcreator.app.LearningStyle
-import com.prafull.roadmapcreator.app.Level
-import com.prafull.roadmapcreator.app.PrerequisiteKnowledge
-import com.prafull.roadmapcreator.app.Timeframe
+import com.prafull.roadmapcreator.app.home.FocusArea
+import com.prafull.roadmapcreator.app.home.LearningStyle
+import com.prafull.roadmapcreator.app.home.Level
+import com.prafull.roadmapcreator.app.home.PrerequisiteKnowledge
+import com.prafull.roadmapcreator.app.home.Timeframe
 
 @Entity
 data class RoadmapEntity(

@@ -15,8 +15,8 @@ interface RoadmapDao {
     fun getRoadmaps(): Flow<List<RoadmapEntity>>
 
     @Delete
-    fun deleteRoadmap(roadmap: RoadmapEntity)
+    suspend fun deleteRoadmap(roadmap: RoadmapEntity)
 
-    @Query("SELECT * FROM RoadmapEntity order by time desc")
-    fun getallroadmaps(): Flow<List<RoadmapEntity>>
+    @Query("DELETE FROM RoadmapEntity")
+    suspend fun deleteAllRoadmaps()
 }

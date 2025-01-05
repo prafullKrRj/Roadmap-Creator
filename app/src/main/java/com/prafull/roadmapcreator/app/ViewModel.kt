@@ -10,13 +10,16 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.prafull.roadmapcreator.app.data.RoadmapDao
 import com.prafull.roadmapcreator.app.data.RoadmapEntity
+import com.prafull.roadmapcreator.app.home.FocusArea
+import com.prafull.roadmapcreator.app.home.LearningStyle
+import com.prafull.roadmapcreator.app.home.Level
+import com.prafull.roadmapcreator.app.home.PrerequisiteKnowledge
+import com.prafull.roadmapcreator.app.home.Timeframe
 import com.prafull.roadmapcreator.utils.ApiKey
 import com.prafull.roadmapcreator.utils.Const
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -52,22 +55,19 @@ data class UiState(
     val loading: Boolean,
     val error: Pair<Boolean, String?>
 )
+
 sealed class NetworkState {
     data object Idle : NetworkState()
     data object Loading : NetworkState()
     data object Success : NetworkState()
     data class Error(val message: String) : NetworkState()
 }
+
 class AppViewModel(
-    private val dao: RoadmapDao
+    private val dao: RoadmapDao,
+    private val apiKey: ApiKey
 ) : ViewModel(), KoinComponent {
 
-    private val apiKey: ApiKey by inject()
-    val history: StateFlow<List<RoadmapEntity>> = dao.getallroadmaps().stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        emptyList()
-    )
     var roadmapPrompt by mutableStateOf(
         RoadmapPrompt(
             skill = ""
@@ -153,36 +153,89 @@ class AppViewModel(
     fun resetState() {
         _networkState.value = NetworkState.Idle
     }
-    fun String.formatRoadmap(): String {
+
+    private fun String.formatRoadmap(): String {
         this.substringAfter("```mermaid").let {
             return it.substringBeforeLast("```")
         }
     }
-
-    fun clearState() {
-        roadmapPrompt = RoadmapPrompt(
-            skill = ""
-        )
-        _state.value = UiState("", roadmapPrompt, "", false, Pair(false, null))
-    }
-
-    fun updateStateFromHistory(roadmap: RoadmapEntity) {
-        roadmapPrompt = RoadmapPrompt(
-            id = roadmap.roadmapId,
-            skill = roadmap.skill,
-            level = Level.valueOf(roadmap.level),
-            timeframe = Timeframe.valueOf(roadmap.timeframe),
-            focusArea = FocusArea.valueOf(roadmap.focusArea),
-            prerequisiteKnowledge = PrerequisiteKnowledge.valueOf(roadmap.prerequisiteKnowledge),
-            learningStyle = LearningStyle.valueOf(roadmap.learningStyle)
-        )
-        _state.value = UiState(
-            prompt = roadmapPrompt.toPrompt(),
-            response = roadmap.roadmap,
-            roadmapPrompt = roadmapPrompt,
-            loading = false,
-            error = Pair(false, null)
-        )
-    }
-
 }
+
+const val dummyResponse = "graph TD\n" +
+        "    Start([Start Here]) --> Prerequisites\n" +
+        "\n" +
+        "    %% Level 1 - Prerequisites\n" +
+        "    Prerequisites --> Languages\n" +
+        "    Languages --> Java[Java Fundamentals]\n" +
+        "    Languages --> Kotlin[Kotlin Basics]\n" +
+        "    Prerequisites --> VersionControl[Git Basics]\n" +
+        "    Prerequisites --> CommandLine[Command Line Usage]\n" +
+        "\n" +
+        "    %% Level 2 - Android Studio & Basics\n" +
+        "    Java & Kotlin --> AndroidStudio\n" +
+        "    AndroidStudio --> ProjectSetup[Project Setup]\n" +
+        "    AndroidStudio --> BuildSystem[Gradle Basics]\n" +
+        "    \n" +
+        "    %% Level 3 - Core Concepts\n" +
+        "    ProjectSetup --> CoreConcepts\n" +
+        "    CoreConcepts --> ActivityLifecycle\n" +
+        "    CoreConcepts --> Fragments\n" +
+        "    CoreConcepts --> Intents\n" +
+        "    \n" +
+        "    %% Level 4 - UI Development\n" +
+        "    CoreConcepts --> UIBasics\n" +
+        "    UIBasics --> Layouts[XML Layouts]\n" +
+        "    UIBasics --> BasicViews[Common Views]\n" +
+        "    UIBasics --> ViewBinding\n" +
+        "    \n" +
+        "    %% Level 5 - Advanced UI\n" +
+        "    UIBasics --> AdvancedUI\n" +
+        "    AdvancedUI --> RecyclerView\n" +
+        "    AdvancedUI --> MaterialDesign\n" +
+        "    AdvancedUI --> JetpackCompose\n" +
+        "    \n" +
+        "    %% Level 6 - Data Management\n" +
+        "    AdvancedUI --> DataManagement\n" +
+        "    DataManagement --> SharedPreferences\n" +
+        "    DataManagement --> SQLite\n" +
+        "    DataManagement --> RoomDatabase\n" +
+        "    \n" +
+        "    %% Level 7 - Networking\n" +
+        "    DataManagement --> Networking\n" +
+        "    Networking --> Retrofit\n" +
+        "    Networking --> OkHttp\n" +
+        "    Networking --> APIs[REST APIs]\n" +
+        "    \n" +
+        "    %% Level 8 - Architecture\n" +
+        "    Networking --> Architecture\n" +
+        "    Architecture --> MVVM\n" +
+        "    Architecture --> CleanArch[Clean Architecture]\n" +
+        "    Architecture --> DependencyInjection\n" +
+        "    DependencyInjection --> Hilt\n" +
+        "    \n" +
+        "    %% Level 9 - Advanced Concepts\n" +
+        "    Architecture --> AdvancedConcepts\n" +
+        "    AdvancedConcepts --> Coroutines\n" +
+        "    AdvancedConcepts --> Flow\n" +
+        "    AdvancedConcepts --> WorkManager\n" +
+        "    \n" +
+        "    %% Level 10 - Testing\n" +
+        "    AdvancedConcepts --> Testing\n" +
+        "    Testing --> UnitTesting\n" +
+        "    Testing --> UITesting\n" +
+        "    Testing --> IntegrationTests\n" +
+        "    \n" +
+        "    %% Level 11 - Publishing\n" +
+        "    Testing --> Publishing\n" +
+        "    Publishing --> AppSigning\n" +
+        "    Publishing --> PlayStore[Play Store Console]\n" +
+        "    Publishing --> AppBundle\n" +
+        "    \n" +
+        "    %% Styling\n" +
+        "    classDef phase1 fill:#e6f3ff,stroke:#4a90e2,stroke-width:2px\n" +
+        "    classDef phase2 fill:#f9e6ff,stroke:#9b51e0,stroke-width:2px\n" +
+        "    classDef phase3 fill:#ffe6e6,stroke:#e04646,stroke-width:2px\n" +
+        "    \n" +
+        "    class Start,Prerequisites,Languages,Java,Kotlin,VersionControl,CommandLine,AndroidStudio,ProjectSetup,BuildSystem phase1\n" +
+        "    class CoreConcepts,UIBasics,AdvancedUI,DataManagement,Networking phase2\n" +
+        "    class Architecture,AdvancedConcepts,Testing,Publishing phase3"

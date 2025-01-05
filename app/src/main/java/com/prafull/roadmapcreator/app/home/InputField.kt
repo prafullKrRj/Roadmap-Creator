@@ -1,4 +1,4 @@
-package com.prafull.roadmapcreator.app
+package com.prafull.roadmapcreator.app.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -50,6 +50,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.prafull.roadmapcreator.R
+import com.prafull.roadmapcreator.app.AppViewModel
+import com.prafull.roadmapcreator.app.NetworkState
+import com.prafull.roadmapcreator.app.Screens
+import com.prafull.roadmapcreator.app.UiState
 import java.util.Locale
 
 
@@ -309,7 +313,12 @@ fun RoadmapInput(viewModel: AppViewModel, state: UiState, navController: NavCont
                     onClick = {
                         viewModel.sendPrompt()
                         if (promptLoaded is NetworkState.Success) {
-                            navController.navigate(Screens.GraphScreen(state.response, state.prompt.toCase()))
+                            navController.navigate(
+                                Screens.GraphScreen(
+                                    state.response,
+                                    state.prompt.toCase()
+                                )
+                            )
                             viewModel.resetState()
                         }
                     },

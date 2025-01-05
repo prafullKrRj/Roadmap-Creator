@@ -1,4 +1,4 @@
-package com.prafull.roadmapcreator.app
+package com.prafull.roadmapcreator.app.graph
 
 import android.webkit.WebView
 import android.webkit.WebViewClient
