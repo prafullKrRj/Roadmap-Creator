@@ -1,8 +1,6 @@
 # 🌍 Roadmap Creator
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/prafullKrRj/Roadmap-Creator/refs/heads/master/logo.png" alt="Roadmap Creator Banner" width="600"/>
-</p>
+
 
 > **Create, Customize, and Save Professional Roadmaps with Ease**
 
@@ -77,15 +75,10 @@ Contributions are welcome! If you find a bug or have a suggestion for a new feat
 ## 🔗 Connect with Me
 
 - **GitHub**: [@prafullKrRj](https://github.com/prafullKrRj)
-- **LinkedIn**: [Your LinkedIn Profile](https://www.linkedin.com/in/your_profile/)
+- **LinkedIn**: [Your LinkedIn Profile](https://www.linkedin.com/in/prafull-kumar-rajput/)
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
-
----
 
 <p align="center">Made with ❤️ by Prafull Kumar</p>
 
