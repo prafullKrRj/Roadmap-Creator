@@ -49,7 +49,7 @@ Welcome to **Roadmap Creator**, an intuitive Android application for generating 
 ## 🔗 Connect with Me
 
 - **GitHub**: [@prafullKrRj](https://github.com/prafullKrRj)
-- **LinkedIn**: [Your LinkedIn Profile](https://www.linkedin.com/in/prafull-kumar-rajput/)
+- **LinkedIn**: [Prafull Kumar](https://www.linkedin.com/in/prafull-kumar-rajput/)
 
 ---
 
